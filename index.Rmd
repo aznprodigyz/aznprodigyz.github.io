@@ -1,0 +1,20 @@
+---
+title: "Final_Project_Binpeng_Zhang"
+author: "Binpeng Zhang"
+date: "5/14/2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+## Data Curation, Parsing and Management
+```{r Data Curation}
+PokemonStats <- read.csv("/Users/bzhang/Documents/cmsc320/Project4/Pokemon.csv")
+head(PokemonStats)
+```
+
+## Exploratory Data Analysis
+## Hypothesis Testing
+## Machine Learning 
+## Insights
