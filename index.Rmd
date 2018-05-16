@@ -8,13 +8,65 @@ output: html_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
+## Pokemon Tutorial: How To Be The Very Best Dragon Pokemon Trainer
+# Introduction:
+Since Pokemon's release in 1996, it has grown in popularity. There have been many animes, games and trading cards based on the series. The immense growth in popular and a huge fanbase allowed for Pokemon to become a competitive field. There are many people dedicated to becoming the very best pokemon trainer in the world. I have created this simple and easier to understand tutorial that will teach you to become the very best dragon type pokemon trainer, because dragons are the best. I will also teach you Data curation, parsing and management, exploratory data analysis, hypothesis testing, machine learning and how to draw insights from the data set using R. 
 ## Data Curation, Parsing and Management
+First we have to load in the dataset of 721 Pokemon, including their number, name, first and second type, and basic stats: HP, Attack, Defense, Special Attack, Special Defense, and Speed. We will also load the necessary libraries such as tidyverse and stringr that will help us later with function calls. 
+
 ```{r Data Curation}
+library(tidyverse)
+library(stringr)
 PokemonStats <- read.csv("/Users/bzhang/Documents/cmsc320/Project4/Pokemon.csv")
 head(PokemonStats)
 ```
+Since we only want to be a Dragon Pokemon Trainer we will tidy the data to filter out all useless non dragon type pokemons. 
+```{r Tidy Data}
+DragonStats <- PokemonStats %>% 
+  filter(Type.1 == "Dragon")
+DragonStats
+```
+In some competitive tournaments legendary pokemons are not allowed so I will create two data sets: 
+One data set for Legendary Pokemons
+One data set for Non-Legendary Pokemons
+```{r legendary}
+LegendaryDragons <- DragonStats %>%
+  filter(Legendary == "True")
+
+NonLegendary <- DragonStats %>%
+  filter(Legendary == "False")
+
+LegendaryDragons
+NonLegendary
+```
 
 ## Exploratory Data Analysis
+Now that we have tidied the data to what we are interested in we can perform some exploratory data analysis on it. We can do things like finding the strongest legendary dragon pokemon or the strongest non legendary pokemon. We define the strongest by the pokemon with the highest total stat. We can find the strongest legendary dragon pokemon by arranging the LegendaryDragons data frame in descending order by total stats using the arrange function and taking the first entity. 
+```{r strongestlegendary}
+StrongestLegend <- LegendaryDragons %>%
+  arrange(desc(Total)) %>%
+  head(1)
+StrongestLegend
+```
+
+We can find the strongest non legendary dragon pokemon by arranging the NonLegendary data frame in descending order by total stats using the arrange function and taking the first entity. 
+```{r strongestnonlegend}
+StrongestNonLegend <- NonLegendary %>%
+  arrange(desc(Total)) %>%
+  head(1)
+StrongestNonLegend
+```
+As we can see from the two data frame, the strongest legendary dragon pokemon RayquazaMega Rayquaza is stronger than the strongest non legendary dragon pokemon SalamenceMega Salamence by 80 total stat points. This may suggest that legendary dragon pokemons are significantly stronger than non legendary dragon pokemons. 
+We will now create some data frames that will summarize these two dataset that will help us get a better analysis of what's going on. 
+```{r summaries}
+NonLegendarySummary <- DragonStats %>% 
+  group_by(Legendary) %>%
+  summarize(min_stat=min(Total), mean_stat=mean(Total), max_stat=max(Total) , sd_stat = sd(Total))
+NonLegendarySummary
+```
+From the above table it seems that the average 
+
+
 ## Hypothesis Testing
 ## Machine Learning 
 ## Insights

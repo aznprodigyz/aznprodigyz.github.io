@@ -125,9 +125,23 @@ $(document).ready(function () {
 </div>
 
 
-<div id="data-curation-parsing-and-management" class="section level2">
-<h2>Data Curation, Parsing and Management</h2>
-<pre class="r"><code>PokemonStats &lt;- read.csv(&quot;/Users/bzhang/Documents/cmsc320/Project4/Pokemon.csv&quot;)
+<div id="pokemon-tutorial-how-to-be-the-very-best-dragon-pokemon-trainer" class="section level2">
+<h2>Pokemon Tutorial: How To Be The Very Best Dragon Pokemon Trainer</h2>
+</div>
+<div id="introduction" class="section level1">
+<h1>Introduction:</h1>
+<p>Since Pokemon’s release in 1996, it has grown in popularity. There have been many animes, games and trading cards based on the series. The immense growth in popular and a huge fanbase allowed for Pokemon to become a competitive field. There are many people dedicated to becoming the very best pokemon trainer in the world. I have created this simple and easier to understand tutorial that will teach you to become the very best dragon type pokemon trainer, because dragons are the best. I will also teach you Data curation, parsing and management, exploratory data analysis, hypothesis testing, machine learning and how to draw insights from the data set using R. ## Data Curation, Parsing and Management First we have to load in the dataset of 721 Pokemon, including their number, name, first and second type, and basic stats: HP, Attack, Defense, Special Attack, Special Defense, and Speed. We will also load the necessary libraries such as tidyverse and stringr that will help us later with function calls.</p>
+<pre class="r"><code>library(tidyverse)</code></pre>
+<pre><code>## ── Attaching packages ─────────────────────────────────────────────── tidyverse 1.2.1 ──</code></pre>
+<pre><code>## ✔ ggplot2 2.2.1     ✔ purrr   0.2.4
+## ✔ tibble  1.4.2     ✔ dplyr   0.7.4
+## ✔ tidyr   0.7.2     ✔ stringr 1.2.0
+## ✔ readr   1.1.1     ✔ forcats 0.2.0</code></pre>
+<pre><code>## ── Conflicts ────────────────────────────────────────────────── tidyverse_conflicts() ──
+## ✖ dplyr::filter() masks stats::filter()
+## ✖ dplyr::lag()    masks stats::lag()</code></pre>
+<pre class="r"><code>library(stringr)
+PokemonStats &lt;- read.csv(&quot;/Users/bzhang/Documents/cmsc320/Project4/Pokemon.csv&quot;)
 head(PokemonStats)</code></pre>
 <pre><code>##   X.                  Name Type.1 Type.2 Total HP Attack Defense Sp..Atk
 ## 1  1             Bulbasaur  Grass Poison   318 45     49      49      65
@@ -143,9 +157,184 @@ head(PokemonStats)</code></pre>
 ## 4     120    80          1     False
 ## 5      50    65          1     False
 ## 6      65    80          1     False</code></pre>
-</div>
+<p>Since we only want to be a Dragon Pokemon Trainer we will tidy the data to filter out all useless non dragon type pokemons.</p>
+<pre class="r"><code>DragonStats &lt;- PokemonStats %&gt;% 
+  filter(Type.1 == &quot;Dragon&quot;)
+DragonStats</code></pre>
+<pre><code>##     X.                    Name Type.1   Type.2 Total  HP Attack Defense
+## 1  147                 Dratini Dragon            300  41     64      45
+## 2  148               Dragonair Dragon            420  61     84      65
+## 3  149               Dragonite Dragon   Flying   600  91    134      95
+## 4  334                 Altaria Dragon   Flying   490  75     70      90
+## 5  334     AltariaMega Altaria Dragon    Fairy   590  75    110     110
+## 6  371                   Bagon Dragon            300  45     75      60
+## 7  372                 Shelgon Dragon            420  65     95     100
+## 8  373               Salamence Dragon   Flying   600  95    135      80
+## 9  373 SalamenceMega Salamence Dragon   Flying   700  95    145     130
+## 10 380                  Latias Dragon  Psychic   600  80     80      90
+## 11 380       LatiasMega Latias Dragon  Psychic   700  80    100     120
+## 12 381                  Latios Dragon  Psychic   600  80     90      80
+## 13 381       LatiosMega Latios Dragon  Psychic   700  80    130     100
+## 14 384                Rayquaza Dragon   Flying   680 105    150      90
+## 15 384   RayquazaMega Rayquaza Dragon   Flying   780 105    180     100
+## 16 443                   Gible Dragon   Ground   300  58     70      45
+## 17 444                  Gabite Dragon   Ground   410  68     90      65
+## 18 445                Garchomp Dragon   Ground   600 108    130      95
+## 19 445   GarchompMega Garchomp Dragon   Ground   700 108    170     115
+## 20 610                    Axew Dragon            320  46     87      60
+## 21 611                 Fraxure Dragon            410  66    117      70
+## 22 612                 Haxorus Dragon            540  76    147      90
+## 23 621               Druddigon Dragon            485  77    120      90
+## 24 643                Reshiram Dragon     Fire   680 100    120     100
+## 25 644                  Zekrom Dragon Electric   680 100    150     120
+## 26 646                  Kyurem Dragon      Ice   660 125    130      90
+## 27 646      KyuremBlack Kyurem Dragon      Ice   700 125    170     100
+## 28 646      KyuremWhite Kyurem Dragon      Ice   700 125    120      90
+## 29 704                   Goomy Dragon            300  45     50      35
+## 30 705                 Sliggoo Dragon            452  68     75      53
+## 31 706                  Goodra Dragon            600  90    100      70
+## 32 718        Zygarde50% Forme Dragon   Ground   600 108    100     121
+##    Sp..Atk Sp..Def Speed Generation Legendary
+## 1       50      50    50          1     False
+## 2       70      70    70          1     False
+## 3      100     100    80          1     False
+## 4       70     105    80          3     False
+## 5      110     105    80          3     False
+## 6       40      30    50          3     False
+## 7       60      50    50          3     False
+## 8      110      80   100          3     False
+## 9      120      90   120          3     False
+## 10     110     130   110          3      True
+## 11     140     150   110          3      True
+## 12     130     110   110          3      True
+## 13     160     120   110          3      True
+## 14     150      90    95          3      True
+## 15     180     100   115          3      True
+## 16      40      45    42          4     False
+## 17      50      55    82          4     False
+## 18      80      85   102          4     False
+## 19     120      95    92          4     False
+## 20      30      40    57          5     False
+## 21      40      50    67          5     False
+## 22      60      70    97          5     False
+## 23      60      90    48          5     False
+## 24     150     120    90          5      True
+## 25     120     100    90          5      True
+## 26     130      90    95          5      True
+## 27     120      90    95          5      True
+## 28     170     100    95          5      True
+## 29      55      75    40          6     False
+## 30      83     113    60          6     False
+## 31     110     150    80          6     False
+## 32      81      95    95          6      True</code></pre>
+<p>In some competitive tournaments legendary pokemons are not allowed so I will create two data sets: One data set for Legendary Pokemons One data set for Non-Legendary Pokemons</p>
+<pre class="r"><code>LegendaryDragons &lt;- DragonStats %&gt;%
+  filter(Legendary == &quot;True&quot;)
+
+NonLegendary &lt;- DragonStats %&gt;%
+  filter(Legendary == &quot;False&quot;)
+
+LegendaryDragons</code></pre>
+<pre><code>##     X.                  Name Type.1   Type.2 Total  HP Attack Defense
+## 1  380                Latias Dragon  Psychic   600  80     80      90
+## 2  380     LatiasMega Latias Dragon  Psychic   700  80    100     120
+## 3  381                Latios Dragon  Psychic   600  80     90      80
+## 4  381     LatiosMega Latios Dragon  Psychic   700  80    130     100
+## 5  384              Rayquaza Dragon   Flying   680 105    150      90
+## 6  384 RayquazaMega Rayquaza Dragon   Flying   780 105    180     100
+## 7  643              Reshiram Dragon     Fire   680 100    120     100
+## 8  644                Zekrom Dragon Electric   680 100    150     120
+## 9  646                Kyurem Dragon      Ice   660 125    130      90
+## 10 646    KyuremBlack Kyurem Dragon      Ice   700 125    170     100
+## 11 646    KyuremWhite Kyurem Dragon      Ice   700 125    120      90
+## 12 718      Zygarde50% Forme Dragon   Ground   600 108    100     121
+##    Sp..Atk Sp..Def Speed Generation Legendary
+## 1      110     130   110          3      True
+## 2      140     150   110          3      True
+## 3      130     110   110          3      True
+## 4      160     120   110          3      True
+## 5      150      90    95          3      True
+## 6      180     100   115          3      True
+## 7      150     120    90          5      True
+## 8      120     100    90          5      True
+## 9      130      90    95          5      True
+## 10     120      90    95          5      True
+## 11     170     100    95          5      True
+## 12      81      95    95          6      True</code></pre>
+<pre class="r"><code>NonLegendary</code></pre>
+<pre><code>##     X.                    Name Type.1 Type.2 Total  HP Attack Defense
+## 1  147                 Dratini Dragon          300  41     64      45
+## 2  148               Dragonair Dragon          420  61     84      65
+## 3  149               Dragonite Dragon Flying   600  91    134      95
+## 4  334                 Altaria Dragon Flying   490  75     70      90
+## 5  334     AltariaMega Altaria Dragon  Fairy   590  75    110     110
+## 6  371                   Bagon Dragon          300  45     75      60
+## 7  372                 Shelgon Dragon          420  65     95     100
+## 8  373               Salamence Dragon Flying   600  95    135      80
+## 9  373 SalamenceMega Salamence Dragon Flying   700  95    145     130
+## 10 443                   Gible Dragon Ground   300  58     70      45
+## 11 444                  Gabite Dragon Ground   410  68     90      65
+## 12 445                Garchomp Dragon Ground   600 108    130      95
+## 13 445   GarchompMega Garchomp Dragon Ground   700 108    170     115
+## 14 610                    Axew Dragon          320  46     87      60
+## 15 611                 Fraxure Dragon          410  66    117      70
+## 16 612                 Haxorus Dragon          540  76    147      90
+## 17 621               Druddigon Dragon          485  77    120      90
+## 18 704                   Goomy Dragon          300  45     50      35
+## 19 705                 Sliggoo Dragon          452  68     75      53
+## 20 706                  Goodra Dragon          600  90    100      70
+##    Sp..Atk Sp..Def Speed Generation Legendary
+## 1       50      50    50          1     False
+## 2       70      70    70          1     False
+## 3      100     100    80          1     False
+## 4       70     105    80          3     False
+## 5      110     105    80          3     False
+## 6       40      30    50          3     False
+## 7       60      50    50          3     False
+## 8      110      80   100          3     False
+## 9      120      90   120          3     False
+## 10      40      45    42          4     False
+## 11      50      55    82          4     False
+## 12      80      85   102          4     False
+## 13     120      95    92          4     False
+## 14      30      40    57          5     False
+## 15      40      50    67          5     False
+## 16      60      70    97          5     False
+## 17      60      90    48          5     False
+## 18      55      75    40          6     False
+## 19      83     113    60          6     False
+## 20     110     150    80          6     False</code></pre>
 <div id="exploratory-data-analysis" class="section level2">
 <h2>Exploratory Data Analysis</h2>
+<p>Now that we have tidied the data to what we are interested in we can perform some exploratory data analysis on it. We can do things like finding the strongest legendary dragon pokemon or the strongest non legendary pokemon. We define the strongest by the pokemon with the highest total stat. We can find the strongest legendary dragon pokemon by arranging the LegendaryDragons data frame in descending order by total stats using the arrange function and taking the first entity.</p>
+<pre class="r"><code>StrongestLegend &lt;- LegendaryDragons %&gt;%
+  arrange(desc(Total)) %&gt;%
+  head(1)
+StrongestLegend</code></pre>
+<pre><code>##    X.                  Name Type.1 Type.2 Total  HP Attack Defense Sp..Atk
+## 1 384 RayquazaMega Rayquaza Dragon Flying   780 105    180     100     180
+##   Sp..Def Speed Generation Legendary
+## 1     100   115          3      True</code></pre>
+<p>We can find the strongest non legendary dragon pokemon by arranging the NonLegendary data frame in descending order by total stats using the arrange function and taking the first entity.</p>
+<pre class="r"><code>StrongestNonLegend &lt;- NonLegendary %&gt;%
+  arrange(desc(Total)) %&gt;%
+  head(1)
+StrongestNonLegend</code></pre>
+<pre><code>##    X.                    Name Type.1 Type.2 Total HP Attack Defense
+## 1 373 SalamenceMega Salamence Dragon Flying   700 95    145     130
+##   Sp..Atk Sp..Def Speed Generation Legendary
+## 1     120      90   120          3     False</code></pre>
+<p>As we can see from the two data frame, the strongest legendary dragon pokemon RayquazaMega Rayquaza is stronger than the strongest non legendary dragon pokemon SalamenceMega Salamence by 80 total stat points. This may suggest that legendary dragon pokemons are significantly stronger than non legendary dragon pokemons. We will now create some data frames that will summarize these two dataset that will help us get a better analysis of what’s going on.</p>
+<pre class="r"><code>NonLegendarySummary &lt;- DragonStats %&gt;% 
+  group_by(Legendary) %&gt;%
+  summarize(min_stat=min(Total), mean_stat=mean(Total), max_stat=max(Total) , sd_stat = sd(Total))
+NonLegendarySummary</code></pre>
+<pre><code>## # A tibble: 2 x 5
+##   Legendary min_stat mean_stat max_stat sd_stat
+##   &lt;fct&gt;        &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt;   &lt;dbl&gt;
+## 1 False          300       477      700   134  
+## 2 True           600       673      780    52.8</code></pre>
+<p>From the above table it seems that the average</p>
 </div>
 <div id="hypothesis-testing" class="section level2">
 <h2>Hypothesis Testing</h2>
@@ -155,6 +344,7 @@ head(PokemonStats)</code></pre>
 </div>
 <div id="insights" class="section level2">
 <h2>Insights</h2>
+</div>
 </div>
 
 
