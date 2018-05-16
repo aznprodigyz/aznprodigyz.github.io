@@ -20,10 +20,14 @@ library(stringr)
 PokemonStats <- read.csv("/Users/bzhang/Documents/cmsc320/Project4/Pokemon.csv")
 head(PokemonStats)
 ```
-Since we only want to be a Dragon Pokemon Trainer we will tidy the data to filter out all useless non dragon type pokemons. 
+Since we only want to be a Dragon Pokemon Trainer we will tidy the data to filter out all useless non dragon type pokemons. We will also tidy names of pokemon such as AltariaMega Altaria to just AltariaMega since repeating Altaria is just redundant. 
 ```{r Tidy Data}
 DragonStats <- PokemonStats %>% 
   filter(Type.1 == "Dragon")
+# before tidying Mega
+DragonStats
+DragonStats$Name<- str_extract(DragonStats$Name,boundary("word"))
+# after tidying all the Mega pokemons
 DragonStats
 ```
 In some competitive tournaments legendary pokemons are not allowed so I will create two data sets: 
@@ -56,7 +60,7 @@ StrongestNonLegend <- NonLegendary %>%
   head(1)
 StrongestNonLegend
 ```
-As we can see from the two data frame, the strongest legendary dragon pokemon RayquazaMega Rayquaza is stronger than the strongest non legendary dragon pokemon SalamenceMega Salamence by 80 total stat points. This may suggest that legendary dragon pokemons are significantly stronger than non legendary dragon pokemons. 
+As we can see from the two data frame, the strongest legendary dragon pokemon RayquazaMegais stronger than the strongest non legendary dragon pokemon SalamenceMega by 80 total stat points. This may suggest that legendary dragon pokemons are significantly stronger than non legendary dragon pokemons. 
 We will now create some data frames that will summarize these two dataset that will help us get a better analysis of what's going on. 
 ```{r summaries}
 NonLegendarySummary <- DragonStats %>% 
@@ -64,9 +68,26 @@ NonLegendarySummary <- DragonStats %>%
   summarize(min_stat=min(Total), mean_stat=mean(Total), max_stat=max(Total) , sd_stat = sd(Total))
 NonLegendarySummary
 ```
-From the above table it seems that the average 
+From the above table it seems that the average legendary dragon pokemon is much stronger than the average non legendary dragon pokemon. Now we want to visualize the data so we can have a pictorial representation of what's going on so it is more intuitive. 
 
-
-## Hypothesis Testing
-## Machine Learning 
+```{r grapphs}
+DragonStats %>%
+  ggplot(mapping = aes(x=Name,y=Total)) +
+  geom_jitter(aes(color = Legendary)) +
+  ggtitle("Legendary vs Non-Legendary") + 
+  ylab("Total Stats") + xlab("Name")
+```
+From the scatter plot above it seems pretty obvious that legendary dragon pokemons are stronger in general, however just to be even more intuitive we are going to create a box plot to have a direct comparison.
+```{r boxplot}
+boxplot(Total~Legendary,data=DragonStats, main="Legendary vs Non-Legendary", 
+  	xlab="Legendary?", ylab="Total Stats")
+```
+By observing this boxplot it is obvious that in general legendary dragon pokemons are stronger than non legendary pokemons almost 100% of the legendary dragon pokemons are stronger than 75% of the non legendary dragon pokemons. 
+## Hypothesis Testing and Machine Learning
+So from the boxplot it's very apparent that legendary dragon pokemons are stronger, so I want to do a hypothesis test on whether or not being legendary has a significant impact. The null hypothesis is that there is no significant difference between Legendary Dragon Pokemons and Non-Legendary Dragon Pokemons.  
+```{r hypothesistesting}
+lgm <- lm(Total~Legendary, data=DragonStats)
+broom::tidy(lgm)
+```
+I used a linear regression line to check if being a legendary dragon pokemon has a significant impact on the total stats. Then I used the tidy function from the broom library to create a table. From observing the p.value of the tidied table, I will have to reject the null hypothesis that there is no significant difference between the total stats of Legendary Dragon Pokemons and Non-Legendary Dragon Pokemons. 
 ## Insights
