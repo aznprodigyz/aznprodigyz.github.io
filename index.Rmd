@@ -32,6 +32,9 @@ DragonStats
 DragonStats$Name<- str_extract(DragonStats$Name,boundary("word"))
 # after tidying all the Mega pokemons
 DragonStats
+# select only the fields I am interested in
+DragonStats <- select(DragonStats, X. , Name, Type.1,Type.2,Total, Generation, Legendary)
+DragonStats
 ```
 In some competitive tournaments legendary pokemons are not allowed so I will create two data sets: 
 One data set for Legendary Pokemons
@@ -76,7 +79,7 @@ From the above table it seems that the average legendary dragon pokemon is much 
 ```{r grapphs}
 nonvslegend <- DragonStats %>%
   ggplot(mapping = aes(x=Name,y=Total)) +
-  geom_jitter(aes(color = Legendary)) +
+  geom_point(aes(color = Legendary)) +
   ggtitle("Legendary vs Non-Legendary") + 
   ylab("Total Stats") + xlab("Name")
 nonvslegend
@@ -118,20 +121,12 @@ What I found interesting here is that there were no legendary dragon pokemons be
 ```{r relationgenstats}
 nonvslegend <- DragonStats %>%
   ggplot(mapping = aes(x=Generation,y=Total)) +
-  geom_jitter(aes(color = Legendary)) +
+  geom_point(aes(color = Legendary)) +
   geom_smooth(method = lm) +
   ggtitle("Total Stats Across Generations") + 
   ylab("Total Stats") + xlab("Generation")
 nonvslegend
 
-nonvslegendlines <- DragonStats %>%
-  ggplot(aes(x = Generation, y= Total)) +
-  geom_smooth(method=lm) + 
-  geom_point()+
-  ggtitle("Total Stats Across Generations") + 
-  ylab("Total Stats") + xlab("Generation")
-
-nonvslegendlines
 
 lgm <- lm(Total~Generation, data=DragonStats)
 broom::tidy(lgm)
@@ -161,7 +156,147 @@ lgm %>%
          x = "Generations",
          y = "Residuals")
 ```
+From observing the residual violins we can tell that the residuals are not zero centered and the distributions are all weird, some are unimodal some are bimodal and some are neither. 
 
+We will now use a 5-fold cross validation to see how well the linear regression line predicts  total stats based on generations. We are using a 5-fold cross validation because our data frame is small for just dragon type pokemons. 
+You can learn more about cross validation by visting this link here:
+http://www.hcbravo.org/IntroDataSci/bookdown-notes/model-selection.html
+and reading lecture 32.1
+For my cross validation I will be utilizing the caret library as well as the psych library.
+You can get more information on the caret library such as documentations by visiting this link: https://cran.r-project.org/web/packages/caret/caret.pdf 
+You can get more information on the psych library by visiting this link:
+https://cran.r-project.org/web/packages/psych/psych.pdf
+
+```{r crossvalidation}
+library(caret)
+library(psych)
+#doing a 5 fold cross validation
+data_train <- trainControl(method = "cv" , number = 5)
+caret_model <- train(Total ~ Generation,
+                     data = DragonStats,
+                     tr = data_train,
+                     method = "lm",
+                     na.action = na.pass) 
+# this is the model prediction
+# notice how the Rsquared value is very low at only 0.0519049 which means
+# that only approximately 5.19% of the total stats variation is explained by Generations thus a linear model is a very poor fit for this data.
+caret_model
+# we can examine the predicitons for each fold of the model
+caret_model$resample
+```
+Now we can compare the 5 cross fold r-square values against the r-square value of the whole data. The r-squared value when using the whole set of data is 0.02258 which is even lower than when using the 5 cross fold, this indicates that splitting my data into training and test sets provided a better method for getting model estimations for total stats based on generations of pokemons.
+```{r summarystats}
+summary_stats <- lm(Total ~ Generation, data = DragonStats)
+summary(summary_stats)
+```
 
 
 ## Insights
+Now that we covered how to create graphs using a data set after tidying up the data frame, make hypothesis tests to answer questions you make be curious regarding the data, and using residual plots and 5-fold cross validation to check how well a prediction model is for the data, it is time to finally answer the question of what is the best dragon pokemon team. I will create a few data frames that will help you create the best dragon pokemon trainer based on your preferences. 
+```{r bestteams}
+# Dragon Pokemon Team that includes all generations as well as legendaries
+StrongAll <- DragonStats %>%
+  arrange(desc(Total)) %>%
+  head(6)
+StrongAll
+
+# Dragon Pokemon Team that includes all generations but no legendaries
+StrongNoLegend <- NonLegendary %>%
+  arrange(desc(Total)) %>%
+  head(6)
+StrongNoLegend
+
+# Dragon Pokemon Team that includes all generations with just legendaries
+StrongLegend <- LegendaryDragons %>%
+  arrange(desc(Total)) %>%
+  head(6)
+StrongLegend
+
+# Dragon Pokemon Team that includes only first generation pokemons
+# Note there's only 4 pokemons so you will have a disadvantage of not having a full team if you just want to have only a first generation team
+StrongFirst <- DragonStats %>%
+  arrange(desc(Total)) %>%
+  filter(Generation == "1") %>%
+  head(6)
+StrongFirst
+
+# Dragon Pokemon Team that includes only second generation pokemons
+StrongSec <- DragonStats %>%
+  arrange(desc(Total)) %>%
+  filter(Generation == "2") %>%
+  head(6)
+StrongSec
+
+# Dragon Pokemon Team that includes only third generation pokemons
+StrongThird <- DragonStats %>%
+  arrange(desc(Total)) %>%
+  filter(Generation == "3") %>%
+  head(6)
+StrongThird
+
+# Dragon Pokemon Team that includes only fourth generation pokemons
+StrongFourth <- DragonStats %>%
+  arrange(desc(Total)) %>%
+  filter(Generation == "4") %>%
+  head(6)
+StrongFourth
+
+# Dragon Pokemon Team that includes only fifth generation pokemons
+StrongFifth <- DragonStats %>%
+  arrange(desc(Total)) %>%
+  filter(Generation == "5") %>%
+  head(6)
+StrongFifth
+
+# Dragon Pokemon Team that includes only sixth generation pokemons
+StrongSixth <- DragonStats %>%
+  arrange(desc(Total)) %>%
+  filter(Generation == "6") %>%
+  head(6)
+StrongSixth
+```
+Now we have all the teams, we can also check which generation team is the strongest. 
+We can answer this question by creating a simple dataframe. 
+```{r whichgeneration}
+# Calculate the team stat total for each generation
+sum_first <- StrongFirst %>%
+  group_by(Generation) %>%
+  summarize(Team_Stats = sum(Total))
+
+sum_sec <- StrongSec %>%
+  group_by(Generation) %>%
+  summarize(Team_Stats = sum(Total))
+
+sum_third <- StrongThird %>%
+  group_by(Generation) %>%
+  summarize(Team_Stats = sum(Total))
+
+sum_fourth <- StrongFourth %>%
+  group_by(Generation) %>%
+  summarize(Team_Stats = sum(Total))
+
+sum_fifth <- StrongFifth %>%
+  group_by(Generation) %>%
+  summarize(Team_Stats = sum(Total))
+
+sum_sixth <- StrongSixth %>%
+  group_by(Generation) %>%
+  summarize(Team_Stats = sum(Total))
+
+# use a full join to combine them into a single data frame
+j_one <- sum_first %>%
+  full_join(sum_sec, by = c( "Generation", "Team_Stats") )
+j_two <- j_one %>%
+  full_join(sum_third, by = c( "Generation", "Team_Stats") )
+j_three <- j_two %>%
+  full_join(sum_fourth, by = c( "Generation", "Team_Stats") )
+j_four <- j_three %>%
+  full_join(sum_fifth, by = c( "Generation", "Team_Stats") )
+j_five <- j_four %>%
+  full_join(sum_sixth, by = c( "Generation", "Team_Stats") )
+
+j_five
+
+```
+
+So in conclusion the fourth and fifth generation has the strongest dragon type pokemon team. From creating this tutorial I was able to give a brief introduction some of the basic features of r such as Data Curation, Parsing and Management, Exploratory Data Analysis, Hypothesis Testing and Machine Learning. I also learned a lot from creating this tutorial as well such as that the fourth and fifth generation had the strongest dragon type pokemons in general. I always assumed pokemons get stronger with each new generation however my assumption was debunked when I tried to apply to a linear regression model on the data and I failed to reject the null hypothesis. I hope this tutorial was as interesting for you as it was for me! 
