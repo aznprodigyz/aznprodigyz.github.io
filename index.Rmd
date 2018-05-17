@@ -12,7 +12,10 @@ knitr::opts_chunk$set(echo = TRUE)
 # Introduction:
 Since Pokemon's release in 1996, it has grown in popularity. There have been many animes, games and trading cards based on the series. The immense growth in popular and a huge fanbase allowed for Pokemon to become a competitive field. There are many people dedicated to becoming the very best pokemon trainer in the world. I have created this simple and easier to understand tutorial that will teach you to become the very best dragon type pokemon trainer, because dragons are the best. I will also teach you Data curation, parsing and management, exploratory data analysis, hypothesis testing, machine learning and how to draw insights from the data set using R. 
 ## Data Curation, Parsing and Management
-First we have to load in the dataset of 721 Pokemon, including their number, name, first and second type, and basic stats: HP, Attack, Defense, Special Attack, Special Defense, and Speed. We will also load the necessary libraries such as tidyverse and stringr that will help us later with function calls. 
+First we have to load in the dataset of 721 Pokemon, including their number, name, first and second type, and basic stats: HP, Attack, Defense, Special Attack, Special Defense, and Speed from https://www.kaggle.com/abcsds/pokemon. We will also load the necessary libraries such as tidyverse and stringr that will help us later with function calls. 
+You can get more information on the libraries by clicking the following links:
+  -https://www.tidyverse.org/ for information on the tidyverse library
+  -https://cran.r-project.org/web/packages/stringr/vignettes/stringr.html for information on the stringr library
 
 ```{r Data Curation}
 library(tidyverse)
@@ -23,7 +26,7 @@ head(PokemonStats)
 Since we only want to be a Dragon Pokemon Trainer we will tidy the data to filter out all useless non dragon type pokemons. We will also tidy names of pokemon such as AltariaMega Altaria to just AltariaMega since repeating Altaria is just redundant. 
 ```{r Tidy Data}
 DragonStats <- PokemonStats %>% 
-  filter(Type.1 == "Dragon")
+  filter(Type.1 == "Dragon" | Type.2 == "Dragon")
 # before tidying Mega
 DragonStats
 DragonStats$Name<- str_extract(DragonStats$Name,boundary("word"))
@@ -71,23 +74,94 @@ NonLegendarySummary
 From the above table it seems that the average legendary dragon pokemon is much stronger than the average non legendary dragon pokemon. Now we want to visualize the data so we can have a pictorial representation of what's going on so it is more intuitive. 
 
 ```{r grapphs}
-DragonStats %>%
+nonvslegend <- DragonStats %>%
   ggplot(mapping = aes(x=Name,y=Total)) +
   geom_jitter(aes(color = Legendary)) +
   ggtitle("Legendary vs Non-Legendary") + 
   ylab("Total Stats") + xlab("Name")
+nonvslegend
 ```
 From the scatter plot above it seems pretty obvious that legendary dragon pokemons are stronger in general, however just to be even more intuitive we are going to create a box plot to have a direct comparison.
 ```{r boxplot}
-boxplot(Total~Legendary,data=DragonStats, main="Legendary vs Non-Legendary", 
-  	xlab="Legendary?", ylab="Total Stats")
+b_plot <- boxplot(Total~Legendary,data=DragonStats, main="Legendary vs Non-Legendary", xlab="Legendary?", ylab="Total Stats")
+b_plot
 ```
 By observing this boxplot it is obvious that in general legendary dragon pokemons are stronger than non legendary pokemons almost 100% of the legendary dragon pokemons are stronger than 75% of the non legendary dragon pokemons. 
 ## Hypothesis Testing and Machine Learning
+For more information on how to do hypothesis testing you can visit this link:
+http://www.r-tutor.com/elementary-statistics/hypothesis-testing
+
 So from the boxplot it's very apparent that legendary dragon pokemons are stronger, so I want to do a hypothesis test on whether or not being legendary has a significant impact. The null hypothesis is that there is no significant difference between Legendary Dragon Pokemons and Non-Legendary Dragon Pokemons.  
+You can get more information on the broom library by going here: https://cran.r-project.org/web/packages/broom/vignettes/broom.html
 ```{r hypothesistesting}
 lgm <- lm(Total~Legendary, data=DragonStats)
 broom::tidy(lgm)
 ```
-I used a linear regression line to check if being a legendary dragon pokemon has a significant impact on the total stats. Then I used the tidy function from the broom library to create a table. From observing the p.value of the tidied table, I will have to reject the null hypothesis that there is no significant difference between the total stats of Legendary Dragon Pokemons and Non-Legendary Dragon Pokemons. 
+I used a linear regression line to check if being a legendary dragon pokemon has a significant impact on the total stats. Then I used the tidy function from the broom library to create a table. From observing the p.value of the tidied table, I will have to reject the null hypothesis that there is no significant difference between the total stats of Legendary Dragon Pokemons and Non-Legendary Dragon Pokemons because the p.value is 4.280380e-07 which is less than the significance value of 0.05. 
+
+Okay, now that we can conclude that legendary dragon pokemons are stronger, let's do something a bit harder. For example, maybe you want to be a dragon generation pokemon enthusiast who wants to use pokemons of only one generations. We can accomplish this by grouping by the generations. We are going to make three data sets one for the legendaries, one for the non-legendaries and one for both so we can have a comparison. 
+```{r generations}
+#legendary generation boxplot
+l_gen <- boxplot(Total~Generation,data=LegendaryDragons, main="Legendary Dragon Boxplot for Each Generations",xlab="Generation", ylab="Total Stats")
+l_gen
+
+#non-legendary generation boxplot
+nl_gen <- boxplot(Total~Generation,data=NonLegendary, main="Non-Legendary Dragon Boxplot for Each Generations",xlab="Generation", ylab="Total Stats")
+nl_gen
+
+#all dragon generation boxplot
+all_gen <- boxplot(Total~Generation,data=DragonStats, main="Dragon Boxplot for Each Generations",xlab="Generation", ylab="Total Stats")
+all_gen
+```
+What I found interesting here is that there were no legendary dragon pokemons before the 3rd generation, this cause me to be curious about whether or not the generations have a big impact on the total stats. In order to test this I will create a scatter plot and create a regression line on it to see if there is any relationship between generation and total stats.
+
+```{r relationgenstats}
+nonvslegend <- DragonStats %>%
+  ggplot(mapping = aes(x=Generation,y=Total)) +
+  geom_jitter(aes(color = Legendary)) +
+  geom_smooth(method = lm) +
+  ggtitle("Total Stats Across Generations") + 
+  ylab("Total Stats") + xlab("Generation")
+nonvslegend
+
+nonvslegendlines <- DragonStats %>%
+  ggplot(aes(x = Generation, y= Total)) +
+  geom_smooth(method=lm) + 
+  geom_point()+
+  ggtitle("Total Stats Across Generations") + 
+  ylab("Total Stats") + xlab("Generation")
+
+nonvslegendlines
+
+lgm <- lm(Total~Generation, data=DragonStats)
+broom::tidy(lgm)
+```
+
+This regression line is suprising, it actually shows a slightly negative relationship between generations and total stats. As the generations increases the total stats of dragon type pokemon decreases. I was expecting it to increase. I will now clean up the data a bit more to see if the relationship remains the same. 
+```{r cleanup}
+cleaned <- DragonStats %>%
+  group_by(Generation) %>%
+  summarize(min_stat=min(Total), mean_stat=mean(Total), max_stat=max(Total) , sd_stat = sd(Total))
+cleaned
+
+Generation_plot <- ggplot(DragonStats, aes(x = Name, y = Total, colour = Generation)) + geom_point() +
+  facet_wrap( ~ Generation)
+
+Generation_plot
+```
+
+From the tables and the plots above it suggests that a linear regression model may not be appropriate for this data. So what I will do now is check the residual plots to see how well the linear regression model fits the data. 
+
+```{r residualplots}
+lgm %>%
+  broom::augment() %>%
+  ggplot(aes(x=factor(Generation), y=.resid)) +
+    geom_violin() +
+    labs(title="Residuals vs Generations",
+         x = "Generations",
+         y = "Residuals")
+```
+
+
+
 ## Insights
